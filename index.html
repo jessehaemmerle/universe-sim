@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Delete Anything</title>
+    <meta name="description" content="Delete anything (the Moon, the oceans, gravity, the cold) and watch what happens to the Earth." />
+    <meta name="theme-color" content="#05070d" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body data-tab="catalog">
+    <div id="stage" class="stage" aria-hidden="true"></div>
+
+    <header class="top" id="top">
+      <div class="brand">
+        <h1 class="title">Delete Anything</h1>
+        <p class="subtitle">and see what happens to the Earth</p>
+      </div>
+      <div class="top-actions">
+        <button id="discoveries-btn" class="chip" type="button">
+          Discoveries <span id="disc-count" class="num">0/0</span>
+        </button>
+        <button id="sound-btn" class="icon-btn" type="button" aria-pressed="false" aria-label="Sound">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-speaker" d="M4 9h4l5-4v14l-5-4H4z" /><path class="i-on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11" /><path class="i-off" d="M16.5 9.5l5 5m0-5l-5 5" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <aside id="catalog" class="panel catalog" aria-label="Things you can delete">
+      <label class="search">
+        <span class="visually-hidden">Find something to delete</span>
+        <input id="search" type="search" placeholder="Find something to delete" autocomplete="off" spellcheck="false" />
+      </label>
+      <div id="catalog-list" class="catalog-list"></div>
+      <div id="catalog-hint" class="catalog-hint"></div>
+    </aside>
+
+    <aside id="status" class="panel status" aria-label="State of the planet">
+      <section class="vitals-wrap" aria-label="Vital signs">
+        <p id="verdict" class="verdict" data-level="0">Thriving</p>
+        <dl id="vitals" class="vitals"></dl>
+      </section>
+      <section class="feed-wrap" aria-label="What happened">
+        <h2 class="panel-title">What happened</h2>
+        <ol id="feed" class="feed"></ol>
+        <p id="feed-empty" class="feed-empty">Nothing deleted yet. Earth is fine. For now.</p>
+      </section>
+    </aside>
+
+    <div id="caption" class="caption" aria-live="polite"></div>
+
+    <footer class="timeline" id="timeline">
+      <button id="play" class="icon-btn play" type="button" aria-label="Play">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-play" d="M7 5l12 7-12 7z" /><path class="i-pause" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+      </button>
+      <div class="clock">
+        <span id="clock-time" class="clock-time num">Ready</span>
+        <span id="clock-note" class="clock-note">Delete something to start the clock</span>
+      </div>
+      <div class="track-wrap">
+        <div id="markers" class="markers" aria-hidden="true"></div>
+        <input id="track" class="track" type="range" min="0" max="1000" step="1" value="0" aria-label="Time since the last deletion" />
+        <div id="ticks" class="ticks" aria-hidden="true"></div>
+      </div>
+      <div class="time-actions">
+        <button id="speed" class="chip num" type="button" aria-label="Playback speed">1×</button>
+        <button id="undo" class="chip" type="button">Undo</button>
+        <button id="reset" class="chip" type="button">Reset</button>
+      </div>
+    </footer>
+
+    <nav class="tabs" aria-label="Panels">
+      <button type="button" data-tab="catalog" aria-pressed="true">Delete</button>
+      <button type="button" data-tab="vitals" aria-pressed="false">Status</button>
+      <button type="button" data-tab="feed" aria-pressed="false">Events <span id="tab-count" class="tab-count num"></span></button>
+    </nav>
+
+    <dialog id="discoveries" class="dialog" aria-labelledby="disc-title">
+      <div class="dialog-head">
+        <h2 id="disc-title">Discoveries</h2>
+        <p id="disc-summary" class="dialog-sub"></p>
+        <button id="disc-close" class="icon-btn" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <ul id="disc-list" class="disc-list"></ul>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <div id="loading" class="loading"><p>Loading Earth</p></div>
+    <noscript><p class="noscript">This game needs JavaScript and WebGL.</p></noscript>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

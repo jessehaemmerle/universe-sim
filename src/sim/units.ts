@@ -11,4 +11,4 @@ export const GYR = 1e9 * YEAR;
 export const HORIZON = 10 * GYR;
 
 /** Light travel time from the Sun to Earth. */
-export const SUNLIGHT_DELAY = 499;
+export const SUNLIGHT_DELAY = 500;

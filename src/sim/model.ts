@@ -629,10 +629,12 @@ export function step(s: State, dt: number, c: Ctx) {
 
 /* ---------- summary for the interface ---------- */
 
-export type Verdict = 'Thriving' | 'Struggling' | 'Collapsing' | 'Barely alive' | 'Microbes only' | 'Lifeless' | 'Destroyed';
+export type Verdict =
+  | 'Thriving' | 'Struggling' | 'Collapsing' | 'Barely alive' | 'Microbes only' | 'Lifeless' | 'Breaking apart' | 'Destroyed';
 
 export function verdict(s: State): Verdict {
   if (s.integrity < 0.3) return 'Destroyed';
+  if (s.integrity < 0.97) return 'Breaking apart';
   const life = lifeIndex(s);
   const complex = s.animals + s.fish + s.insects + s.plants;
   if (life <= 1e-6) return 'Lifeless';
