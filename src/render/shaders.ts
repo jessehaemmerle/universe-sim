@@ -164,9 +164,10 @@ void main() {
   // --- land ---
   float wasSea = smoothstep(0.0, -60.0, rawH);
   float lum = dot(albedo, vec3(0.299, 0.587, 0.114));
-  float green = clamp((albedo.g - 0.5 * (albedo.r + albedo.b)) * 6.0, 0.0, 1.0);
+  // How much of this pixel is vegetation: green standing out from red and blue (linear colour).
+  float green = smoothstep(0.0, 0.2, (albedo.g - max(albedo.r, albedo.b)) / max(albedo.g, 0.02));
   vec3 barren = mix(vec3(0.42, 0.36, 0.30), vec3(0.62, 0.52, 0.40), smoothstep(0.1, 0.4, lum)) * (0.8 + 0.4 * lum);
-  vec3 land = mix(albedo, barren, green * (1.0 - uVeg) * 0.9 + uDry * green * 0.5);
+  vec3 land = mix(albedo, barren, clamp(green * (1.0 - uVeg) + uDry * green * 0.5, 0.0, 1.0));
   // baked-in ice sheets shrink from their edges as land ice disappears
   float bakedIce = smoothstep(1.0 - clamp(uLandIce, 0.0, 1.0) - 0.02, 1.0 - clamp(uLandIce, 0.0, 1.0) + 0.08, data.b);
   vec3 bedrock = mix(vec3(0.33, 0.31, 0.29), vec3(0.45, 0.41, 0.36), n1 * 0.5 + 0.5);
@@ -290,9 +291,9 @@ void main() {
   // aurora: curtains around the magnetic poles on the night side
   vec3 d = normalize(vPos);
   float lat = abs(asin(d.y)) * 57.2958;
-  float band = smoothstep(58.0, 66.0, lat) * smoothstep(78.0, 70.0, lat);
+  float band = smoothstep(62.0, 67.0, lat) * smoothstep(74.0, 69.0, lat);
   float curtain = smoothstep(0.35, 0.85, snoise(vec3(d.xz * 4.0, uTime * 0.08)) * 0.5 + 0.5);
-  col += vec3(0.25, 1.0, 0.55) * band * curtain * uAurora * smoothstep(0.0, -0.4, dot(N, uSunDir)) * rim * 0.45;
+  col += vec3(0.25, 1.0, 0.55) * band * curtain * uAurora * smoothstep(-0.1, -0.5, dot(N, uSunDir)) * rim * 0.3;
   gl_FragColor = vec4(col, 1.0);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
