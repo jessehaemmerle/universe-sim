@@ -88,7 +88,7 @@ export class World {
 
   /** Delete something at an absolute time (seconds after the first deletion). */
   add(id: string, at: number) {
-    if (this.isDeleted(id)) return;
+    if (this.isDeleted(id) || !this.catalog.has(id)) return;
     const t = this.deletions.length === 0 ? 0 : Math.max(at, this.deletions[this.deletions.length - 1].at);
     this.deletions.push({ id, at: t });
     this.rebuild();
@@ -160,8 +160,7 @@ export class World {
 
       // The deletion itself.
       const d = this.deletions[k];
-      const def = this.catalog.get(d.id);
-      if (!def) continue;
+      const def = this.catalog.get(d.id)!;
       const parent = def.partOf?.find((p) => at.has(p) && at.get(p)! < d.at + 1e-9 && p !== d.id);
       if (parent) {
         this.moot.add(d.id);
@@ -200,10 +199,10 @@ export class World {
           queue.push({ r, source: 'combo', key: `combo:${i}`, ev: { at: cb.at, title: cb.title, body: cb.body, sev: cb.sev } });
         }
       });
-      NATURE.forEach((ne, i) => {
+      NATURE.forEach((ne) => {
         const r = ne.t - start;
         if (r >= 0 && r < span) {
-          queue.push({ r, source: 'nature', key: `nature:${i}`, ev: { at: ne.t, title: ne.title, body: ne.body, sev: ne.sev, when: ne.when, effect: ne.effect, cosmic: true } });
+          queue.push({ r, source: 'nature', key: `nature:${ne.id}`, ev: { at: ne.t, title: ne.title, body: ne.body, sev: ne.sev, when: ne.when, effect: ne.effect, cosmic: true } });
         }
       });
       queue.sort((a, b) => a.r - b.r);
@@ -227,12 +226,15 @@ export class World {
           // Don't flicker: a watcher may only fire again after a lot more time has passed.
           const last = lastFired.get(w.id);
           const rested = last === undefined || now > last * 3 + YEAR;
-          if (on && !flags.get(w.id) && !(w.once && seen.has(w.id)) && rested) {
+          if (!on) {
+            flags.set(w.id, false);
+          } else if (!flags.get(w.id) && !(w.once && seen.has(w.id)) && rested) {
             this.events.push({ key: `auto:${w.id}:${autoCount++}`, t: now, source: 'auto', title: w.title, body: w.body, sev: w.sev });
             seen.add(w.id);
             lastFired.set(w.id, now);
+            flags.set(w.id, true);
           }
-          flags.set(w.id, on);
+          // While resting, the flag stays down so the crossing is reported once the rest is over.
         }
       };
 

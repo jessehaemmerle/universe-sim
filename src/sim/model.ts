@@ -309,7 +309,8 @@ function stepWater(s: State, c: Ctx, dt: number, Ts: number) {
 
 /* ---------- air ---------- */
 
-function volcanic(c: Ctx): boolean {
+/** Whether volcanoes can still erupt and breathe out CO₂. */
+export function volcanic(c: Pick<Ctx, 'has'>): boolean {
   return !c.has('volcanoes') && !c.has('tectonics') && !c.has('heat') && !c.has('core') && !c.has('iron');
 }
 

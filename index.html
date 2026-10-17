@@ -15,6 +15,7 @@
     />
   </head>
   <body data-tab="catalog">
+    <a class="skip" href="#main">Skip to the game</a>
     <div id="stage" class="stage" aria-hidden="true"></div>
 
     <header class="top" id="top">
@@ -32,6 +33,7 @@
       </div>
     </header>
 
+    <main id="main">
     <aside id="catalog" class="panel catalog" aria-label="Things you can delete">
       <label class="search">
         <span class="visually-hidden">Find something to delete</span>
@@ -69,11 +71,12 @@
         <div id="ticks" class="ticks" aria-hidden="true"></div>
       </div>
       <div class="time-actions">
-        <button id="speed" class="chip num" type="button" aria-label="Playback speed">1×</button>
+        <button id="speed" class="chip num" type="button" aria-label="Playback speed 1×">1×</button>
         <button id="undo" class="chip" type="button">Undo</button>
         <button id="reset" class="chip" type="button">Reset</button>
       </div>
     </footer>
+    </main>
 
     <nav class="tabs" aria-label="Panels">
       <button type="button" data-tab="catalog" aria-pressed="true">Delete</button>
@@ -92,7 +95,7 @@
       <ul id="disc-list" class="disc-list"></ul>
     </dialog>
 
-    <div id="toast" class="toast" role="status"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="loading" class="loading"><p>Loading Earth</p></div>
     <noscript><p class="noscript">This game needs JavaScript and WebGL.</p></noscript>
     <script type="module" src="./src/main.ts"></script>

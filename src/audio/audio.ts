@@ -16,6 +16,7 @@ export class Sound {
 
   /** Must be called from a user gesture (browsers block autoplay). */
   start() {
+    if (!this.enabled) return;
     if (this.ctx) {
       void this.ctx.resume();
       return;

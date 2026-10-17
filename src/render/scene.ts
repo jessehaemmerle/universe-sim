@@ -98,6 +98,12 @@ export class PlanetView {
     this.controls.maxDistance = 40;
     this.controls.rotateSpeed = 0.6;
     this.reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    // Once the player zooms (wheel or pinch), stop re-fitting the globe on resize.
+    let startDist = 0;
+    this.controls.addEventListener('start', () => (startDist = this.camera.position.length()));
+    this.controls.addEventListener('end', () => {
+      if (Math.abs(this.camera.position.length() - startDist) > 0.01) this.userZoomed = true;
+    });
 
     this.scene.add(this.tiltGroup);
     this.tiltGroup.add(this.spinGroup);
@@ -362,10 +368,6 @@ export class PlanetView {
   }
 
   private userZoomed = false;
-
-  markZoomed() {
-    this.userZoomed = true;
-  }
 
   setVisuals(v: Visuals) {
     this.target = v;

@@ -48,6 +48,13 @@ button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 .num { font-variant-numeric: tabular-nums; }
 
+.skip {
+  position: fixed; z-index: 20; left: var(--gutter); top: 8px; padding: 8px 14px;
+  background: var(--paper); color: var(--void); border-radius: 10px; font-weight: 700;
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
 }

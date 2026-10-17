@@ -30,6 +30,8 @@ let playing = false;
 let speedIdx = 0;
 let dwell = 0;
 let lastAbs = 0;
+/** Events already captioned and played, so nothing is announced twice. */
+let announced = new Set<string>();
 let restoredSomething = false;
 
 const curAbs = () => (world.last ? world.last.start + toSeconds(x) : 0);
@@ -54,7 +56,6 @@ function del(id: string) {
   const at = world.empty ? 0 : curAbs();
   world.add(id, at);
   x = 0;
-  lastAbs = at - Math.max(1e-6, at * 1e-12);
   playing = !frozen();
   dwell = 1.5;
   view?.erase(def.visual);
@@ -87,16 +88,24 @@ function afterRemoval(abs: number) {
     resetClock();
   } else {
     x = Math.min(X_MAX, toX(Math.max(0, abs - world.last!.start)));
-    lastAbs = curAbs();
+    silence();
   }
   sound.restore();
   refreshCatalog();
+}
+
+/** Treat everything up to the playhead as already seen. */
+function silence() {
+  const abs = curAbs();
+  announced = new Set(world.events.filter((e) => e.t <= abs).map((e) => e.key));
+  lastAbs = abs;
 }
 
 function resetClock() {
   x = 0;
   playing = false;
   lastAbs = 0;
+  announced.clear();
   caption.showText('Pick anything to delete', 'Then watch what happens to the Earth.');
 }
 
@@ -166,7 +175,7 @@ document.querySelectorAll<HTMLButtonElement>('.tabs button').forEach((b) => {
 
 document.addEventListener('keydown', (e) => {
   const target = e.target as HTMLElement;
-  if (target.closest('input, textarea, dialog')) return;
+  if (target.closest('input, textarea, dialog, button, a, select')) return;
   if (e.code === 'Space' && !world.empty && !frozen()) {
     e.preventDefault();
     playing = !playing;
@@ -201,7 +210,6 @@ async function boot() {
     view = new PlanetView($('stage'));
     const big = window.innerWidth > 900 && view.renderer.capabilities.maxTextureSize >= 4096;
     await view.load(`./textures/earth-color-${big ? '4k' : '2k'}.jpg`, './textures/earth-data.png');
-    view.canvas.addEventListener('wheel', () => view?.markZoomed(), { passive: true });
     window.addEventListener('resize', layout);
     layout();
     loading.classList.add('done');
@@ -221,9 +229,6 @@ let uiTimer = 0;
 let discTimer = 0;
 let clockSeconds = 0;
 
-function passEvents(from: number, to: number): SimEvent[] {
-  return world.events.filter((e) => e.t > from && e.t <= to);
-}
 
 function loop(now: number) {
   const dt = Math.min(0.1, (now - prev) / 1000);
@@ -239,12 +244,16 @@ function loop(now: number) {
   if (frozen()) playing = false;
 
   const abs = curAbs();
-  if (abs > lastAbs) {
-    for (const e of passEvents(lastAbs, abs)) {
-      caption.show(e, relTime(e.t), clockSeconds);
-      sound.event(e.sev);
-      if (e.sev !== 'info') dwell = Math.max(dwell, 1.1);
-    }
+  if (abs < lastAbs) {
+    // Scrubbed back: events ahead of the playhead may be announced again later.
+    for (const e of world.events) if (e.t > abs) announced.delete(e.key);
+  }
+  for (const e of world.events) {
+    if (e.t > abs || announced.has(e.key)) continue;
+    announced.add(e.key);
+    caption.show(e, relTime(e.t), clockSeconds);
+    sound.event(e.sev);
+    if (e.sev !== 'info') dwell = Math.max(dwell, 1.1);
   }
   lastAbs = abs;
   caption.tick(clockSeconds);

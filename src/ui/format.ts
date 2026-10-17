@@ -1,24 +1,26 @@
 import { DAY, GYR, HOUR, KYR, MIN, MYR, YEAR } from '../sim/units';
 
-const n1 = (x: number) => (x >= 100 ? Math.round(x).toString() : x >= 10 ? x.toFixed(0) : x.toFixed(1).replace(/\.0$/, ''));
+const n1 = (x: number) =>
+  x >= 99.5 ? Math.round(x).toLocaleString('en-US') : x >= 9.95 ? x.toFixed(0) : x.toFixed(1).replace(/\.0$/, '');
 const plural = (x: number, unit: string) => `${n1(x)} ${unit}${n1(x) === '1' ? '' : 's'}`;
 
 /** "8 min 20 s", "3 days", "1.5 million years". */
 export function duration(t: number): string {
   if (t < 0.0005) return '0 s';
-  if (t < 1) return `${(t * 1000).toFixed(0)} ms`;
-  if (t < MIN) return `${n1(t)} s`;
-  if (t < HOUR) {
-    const m = Math.floor(t / MIN);
-    const s = Math.round(t - m * MIN);
+  if (t < 0.9995) return `${(t * 1000).toFixed(0)} ms`;
+  if (t < 59.5) return `${n1(t)} s`;
+  if (t < HOUR - 30) {
+    const total = Math.round(t);
+    const m = Math.floor(total / MIN);
+    const s = total % MIN;
     return s && m < 10 ? `${m} min ${s} s` : `${Math.round(t / MIN)} min`;
   }
   if (t < DAY) return plural(t / HOUR, 'hour');
   if (t < 60 * DAY) return plural(t / DAY, 'day');
   if (t < YEAR) return plural(t / (30.44 * DAY), 'month');
-  if (t < 10 * KYR) return plural(t / YEAR, 'year').replace(/^(\d)(\d{3}) /, '$1,$2 ');
-  if (t < MYR) return `${Math.round(t / YEAR / 1000)},000 years`;
-  if (t < GYR) return `${n1(t / MYR)} million years`;
+  if (t < 9999.5 * YEAR) return plural(t / YEAR, 'year');
+  if (t < 999.5 * KYR) return `${Math.round(t / KYR).toLocaleString('en-US')},000 years`;
+  if (t < 999.5 * MYR) return `${n1(t / MYR)} million years`;
   return `${n1(t / GYR)} billion years`;
 }
 

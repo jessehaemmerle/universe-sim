@@ -1,10 +1,7 @@
-import { lifeIndex } from '../model';
+import { lifeIndex, volcanic } from '../model';
 import type { Deletable } from '../types';
 import { DAY, HOUR, KYR, MIN, MYR, GYR, YEAR } from '../units';
 import { coreCollapse, ev, hit } from './helpers';
-
-const volcanic = (c: { has(id: string): boolean }) =>
-  !c.has('volcanoes') && !c.has('tectonics') && !c.has('heat') && !c.has('core') && !c.has('iron');
 
 export const PLANET: Deletable[] = [
   {

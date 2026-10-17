@@ -91,10 +91,18 @@ export class Hypsometry {
   seaLevel(ocean: number, shape: SurfaceShape): number {
     if (!this.ready) return 0;
     if (ocean <= 0) return MIN_H - 100;
-    const key = `${shape.bulge.toFixed(1)}|${shape.landCut}|${shape.mountainCut}`;
+    // Only the two end states are tabulated; the spin-down in between is interpolated.
+    const b = Math.min(1, Math.max(0, shape.bulge));
+    const level0 = b < 1 ? this.levelFor(ocean, { ...shape, bulge: 0 }) : 0;
+    const level1 = b > 0 ? this.levelFor(ocean, { ...shape, bulge: 1 }) : 0;
+    return level0 * (1 - b) + level1 * b;
+  }
+
+  private levelFor(ocean: number, shape: SurfaceShape): number {
+    const key = `${shape.bulge}|${shape.landCut}|${shape.mountainCut}`;
     let table = this.tables.get(key);
     if (!table) {
-      const hist = this.histogram({ ...shape, bulge: Number(shape.bulge.toFixed(1)) });
+      const hist = this.histogram(shape);
       table = new Float64Array(161);
       for (let i = 0; i < table.length; i++) {
         const target = (i / 100) * this.v0;

@@ -1,4 +1,4 @@
-import { civ, co2Gas, lifeIndex, molten, o2Gas, pressure } from './model';
+import { civ, co2Gas, lifeIndex, molten, o2Gas, pressure, volcanic } from './model';
 import type { Ctx, Severity, State } from './types';
 import { GYR, KYR, MYR } from './units';
 
@@ -208,6 +208,7 @@ export const WATCHERS: Watcher[] = [
 /* ---------- things that happen anyway ---------- */
 
 export interface NaturalEvent {
+  id: string;
   t: number; // seconds after the first deletion
   title: string;
   body: string;
@@ -216,25 +217,24 @@ export interface NaturalEvent {
   effect?: (s: State, c: Ctx) => void;
 }
 
-const volcanic = (c: Ctx) => !c.has('volcanoes') && !c.has('tectonics') && !c.has('heat') && !c.has('core') && !c.has('iron');
 const sunAround = (s: State, c: Ctx) => s.sun > 0.5 && !c.has('sun') && !c.has('gravity') && !c.has('strong');
 
 export const NATURE: NaturalEvent[] = [
   {
-    t: 50 * KYR, sev: 'warn',
+    id: 'supervolcano', t: 50 * KYR, sev: 'warn',
     title: 'A supervolcano erupts',
     body: 'Statistically, an eruption the size of Toba 74,000 years ago happens every 50,000 years or so. Ash and sulfur dim the sky for several years.',
     when: (s, c) => intact(s) && volcanic(c) && molten(s) < 0.1 && sunAround(s, c) && s.dist < 2,
     effect: (s) => { s.dust = Math.min(1, s.dust + 0.35); },
   },
   {
-    t: 1 * MYR, sev: 'info',
+    id: 'humans-unknown', t: 1 * MYR, sev: 'info',
     title: 'From here on, nobody can predict humans',
     body: 'A million years is longer than our species has existed. The simulation assumes people stick around for as long as the planet lets them.',
     when: (s) => s.humans > 0.001,
   },
   {
-    t: 100 * MYR, sev: 'doom',
+    id: 'impact', t: 100 * MYR, sev: 'doom',
     title: 'A dinosaur-killer asteroid hits',
     body: 'Rocks 10 km across hit Earth about once every 100 million years, so odds are one has arrived by now. Global firestorms and years of darkness bring a mass extinction.',
     when: (s, c) => intact(s) && !c.has('asteroids') && molten(s) < 0.5 && lifeIndex(s) > 0.05,
@@ -244,32 +244,32 @@ export const NATURE: NaturalEvent[] = [
     },
   },
   {
-    t: 250 * MYR, sev: 'bad',
+    id: 'supercontinent', t: 250 * MYR, sev: 'bad',
     title: 'The continents merge into a supercontinent',
     body: 'Plate tectonics pushes the continents back together. A 2023 study suggests its hot, dry interior would leave most of it too hot for mammals.',
     when: (s, c) => intact(s) && !c.has('tectonics') && !c.has('land') && !c.has('heat') && molten(s) < 0.5,
     effect: (s) => { s.animals *= 0.5; s.humans *= 0.5; },
   },
   {
-    t: 1 * GYR, sev: 'bad',
+    id: 'sun-brighter', t: 1 * GYR, sev: 'bad',
     title: 'The Sun is 10% brighter than today',
     body: 'The Sun slowly brightens as it ages. Now it is hot enough to drive water vapour high into the air, where it is lost to space. The oceans start to disappear.',
     when: (s, c) => intact(s) && sunAround(s, c) && s.dist < 1.5 && s.ocean > 0.1,
   },
   {
-    t: 4.5 * GYR, sev: 'info',
+    id: 'andromeda', t: 4.5 * GYR, sev: 'info',
     title: 'Andromeda fills the night sky',
     body: 'The Andromeda galaxy swings close to the Milky Way. Recent estimates put the chance of the two merging within 10 billion years at roughly 50/50.',
     when: (_s, c) => !c.has('stars') && !c.has('strong'),
   },
   {
-    t: 5 * GYR, sev: 'warn',
+    id: 'red-giant', t: 5 * GYR, sev: 'warn',
     title: 'The Sun runs out of hydrogen in its core',
     body: 'It starts to swell into a red giant. Over the next 2.5 billion years it grows about 250 times wider and thousands of times brighter.',
     when: (s, c) => sunAround(s, c),
   },
   {
-    t: 7.59 * GYR, sev: 'doom',
+    id: 'swallowed', t: 7.59 * GYR, sev: 'doom',
     title: 'The Sun swallows Earth',
     body: 'The red giant Sun reaches past Earth’s orbit. Drag in its outer layers slows Earth down until it spirals in and vaporises, whatever you deleted.',
     when: (s, c) => s.integrity > 0.05 && sunAround(s, c) && s.dist < 3,
@@ -279,13 +279,13 @@ export const NATURE: NaturalEvent[] = [
     },
   },
   {
-    t: 7.6 * GYR, sev: 'good',
+    id: 'escaped', t: 7.6 * GYR, sev: 'good',
     title: 'Earth escapes the Sun’s fate',
     body: 'Because Earth was drifting far away, it is spared when the Sun becomes a red giant. Earth may well outlive the Sun.',
     when: (s) => s.integrity > 0.5 && s.dist >= 3,
   },
   {
-    t: 7.8 * GYR, sev: 'info',
+    id: 'white-dwarf', t: 7.8 * GYR, sev: 'info',
     title: 'The Sun becomes a white dwarf',
     body: 'Having shed its outer layers, the Sun shrinks to a dim, Earth-sized ember that will cool for trillions of years.',
     when: (s, c) => sunAround(s, c),

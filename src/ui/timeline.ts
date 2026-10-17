@@ -63,6 +63,8 @@ export class TimelineView {
     el.time.textContent = !o.started ? 'Ready' : o.frozen ? 'Stopped' : `T + ${duration(t)}`;
     el.note.textContent = o.note;
     el.speed.textContent = `${o.speed}×`;
+    el.speed.setAttribute('aria-label', `Playback speed ${o.speed}\u00d7`);
+    el.track.setAttribute('aria-valuetext', o.started ? `${duration(t)} ${o.note}` : 'Not started');
     el.undo.disabled = !o.canUndo;
     el.reset.disabled = !o.started;
 

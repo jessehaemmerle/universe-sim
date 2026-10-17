@@ -1,3 +1,4 @@
+import { volcanic } from '../model';
 import type { Deletable } from '../types';
 import { DAY, HOUR, KYR, MIN, MYR, YEAR } from '../units';
 import { coreCollapse, ev, hit } from './helpers';
@@ -42,7 +43,7 @@ export const AIR: Deletable[] = [
       ev(30 * DAY, 'doom', 'Crops wither', 'Fields everywhere stop growing. The food already in storage is all there is.'),
       ev(YEAR, 'doom', 'The cold sets in', 'CO₂ holds the greenhouse effect together. Without it, water vapour freezes out of the air too, and Earth cools fast.'),
       ev(100 * KYR, 'good', 'Volcanoes refill the air', 'Volcanoes keep breathing out CO₂. With the oceans frozen, rocks stop soaking it up, so over millions of years it piles up until the ice starts to melt.', {
-        when: (_s, c) => !c.has('volcanoes') && !c.has('tectonics') && !c.has('heat'),
+        when: (_s, c) => volcanic(c),
       }),
     ],
   },
